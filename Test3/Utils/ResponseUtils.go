@@ -3,7 +3,6 @@ package Utils
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"laundry/Constant/APIResponse"
 	"laundry/Model"
 	"net/http"
 )
@@ -38,5 +37,5 @@ func OkResponseMessage(c echo.Context, message string, data interface{}) error {
 }
 
 func OkResponse(c echo.Context, data interface{}) error {
-	return OkResponseMessage(c, APIResponse.DefaultMessageResponse, data)
+	return OkResponseMessage(c, http.StatusText(http.StatusOK), data)
 }
