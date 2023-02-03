@@ -14,10 +14,6 @@ func UserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return getToken(next, Constant.User)
 }
 
-func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return getToken(next, Constant.Admin)
-}
-
 func getToken(next echo.HandlerFunc, role string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
@@ -27,7 +23,7 @@ func getToken(next echo.HandlerFunc, role string) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, Model.ErrorResponse{Message: "token is required"})
 		}
 
-		err, secretToken, identifier := Utils.GenerateSecretTokenAndIdentifier(role)
+		err, secretToken := Utils.GenerateSecretTokenAndIdentifier(role)
 
 		if err != nil {
 			return err
@@ -51,13 +47,7 @@ func getToken(next echo.HandlerFunc, role string) echo.HandlerFunc {
 			return Utils.JWTErrorResponse(err)
 		}
 
-		jwtRole := claims[Constant.UserClaimsRole].(string)
-
-		Utils.SetJwtClaims(c, claims[Constant.UserClaimsId].(string), jwtRole)
-
-		if jwtRole != identifier {
-			return Utils.BadRequestResponseWithMessage("role invalid")
-		}
+		Utils.SetJwtClaims(c, claims[Constant.UserClaimsId].(string))
 
 		return next(c)
 	}

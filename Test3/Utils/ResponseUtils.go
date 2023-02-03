@@ -8,14 +8,13 @@ import (
 	"net/http"
 )
 
-func errorResponse(err error, context string, httpStatus int) error {
-	message := context
+func errorResponse(err error, message string, httpStatus int) error {
 	if httpStatus >= 500 {
 		message = "failed to " + message
 		fmt.Println(message+": ", err)
 	}
 
-	return echo.NewHTTPError(httpStatus, message)
+	return echo.NewHTTPError(httpStatus, http.StatusText(httpStatus))
 }
 
 func JWTErrorResponse(err error) error {
@@ -31,7 +30,7 @@ func BadRequestResponseWithMessage(message string) error {
 }
 
 func BadRequestResponse() error {
-	return errorResponse(nil, "bad request", http.StatusBadRequest)
+	return BadRequestResponseWithMessage(http.StatusText(http.StatusBadRequest))
 }
 
 func OkResponseMessage(c echo.Context, message string, data interface{}) error {
@@ -39,5 +38,5 @@ func OkResponseMessage(c echo.Context, message string, data interface{}) error {
 }
 
 func OkResponse(c echo.Context, data interface{}) error {
-	return c.JSON(http.StatusOK, Model.NewDefaultResponse(APIResponse.DefaultMessageResponse, data))
+	return OkResponseMessage(c, APIResponse.DefaultMessageResponse, data)
 }

@@ -8,39 +8,33 @@ import (
 	"strconv"
 )
 
-func GenerateSecretTokenAndIdentifier(role string) (error, string, string) {
-	secretToken := ""
-	identifier := ""
+func GenerateSecretTokenAndIdentifier(role string) (error, string) {
+	var secretToken string
 
 	switch role {
 	case Constant.User:
 		secretToken = os.Getenv("JWTUSERSECRETTOKEN")
-		identifier = os.Getenv("JWTUSERIDENTIFIER")
-	case Constant.Admin:
-		secretToken = os.Getenv("JWTADMINSECRETTOKEN")
-		identifier = os.Getenv("JWTADMINIDENTIFIER")
 	default:
-		return BadRequestResponseWithMessage("role not found"), "", ""
+		return BadRequestResponseWithMessage("role not found"), ""
 	}
 
-	if secretToken == "" || identifier == "" {
-		return BadRequestResponseWithMessage("secret token or identifier is empty"), "", ""
+	if secretToken == "" {
+		return BadRequestResponseWithMessage("secret token or identifier is empty"), ""
 	}
 
-	return nil, secretToken, identifier
+	return nil, secretToken
 }
 
-func SetJwtClaims(c echo.Context, id string, role string) {
+func SetJwtClaims(c echo.Context, id string) {
 	c.Set(Constant.UserClaimsId, id)
-	c.Set(Constant.UserClaimsRole, role)
 }
 
-func GetJwtClaims(c echo.Context) (uint, string) {
-	return c.Get(Constant.UserClaimsId).(uint), c.Get(Constant.UserClaimsRole).(string)
+func GetJwtClaims(c echo.Context) uint {
+	return c.Get(Constant.UserClaimsId).(uint)
 }
 
 func GenerateJwtToken(id uint, role string) (string, error) {
-	err, secretToken, role := GenerateSecretTokenAndIdentifier(role)
+	err, secretToken := GenerateSecretTokenAndIdentifier(role)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +42,6 @@ func GenerateJwtToken(id uint, role string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 	claims := token.Claims.(jwt.MapClaims)
 	claims[Constant.UserClaimsId] = strconv.Itoa(int(id))
-	claims[Constant.UserClaimsRole] = role
 
 	t, err := token.SignedString([]byte(secretToken))
 

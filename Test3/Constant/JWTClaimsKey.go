@@ -1,6 +1,5 @@
 package Constant
 
 const (
-	UserClaimsId   = "userId"
-	UserClaimsRole = "userRole"
+	UserClaimsId = "userId"
 )
